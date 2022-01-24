@@ -148,6 +148,8 @@ return MaterialApp(
 We have an application to help you configure your translation keys.
 The project is also open-source, so be fine if you want to help it evolve!
 
+[Download now](https://github.com/Flutterando/localization/releases)
+
 ## Features and bugs
 
 The Segmented State Standard is constantly growing.
