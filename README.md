@@ -143,7 +143,7 @@ return MaterialApp(
 
 ## Localization UI
 
-![localization-ui.png]()
+![localization ui](https://github.com/Flutterando/localization/blob/master/localization-ui.png)
 
 We have an application to help you configure your translation keys.
 The project is also open-source, so be fine if you want to help it evolve!
