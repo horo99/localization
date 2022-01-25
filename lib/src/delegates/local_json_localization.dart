@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:localization/src/localization_service.dart';
 
 class LocalJsonLocalization extends LocalizationsDelegate {
-  String directory = 'lib/i18n';
+  List<String> directory = ['lib/i18n'];
   bool showDebugPrintMode = true;
   LocalJsonLocalization._();
 
