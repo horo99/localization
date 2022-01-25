@@ -1,7 +1,7 @@
 name: localization
 description: Package to simplify the package translation.
-version: 1.1.2-dev.1
-homepage: https://github.com/davidsdearaujo/localization
+version: 2.0.0
+homepage: https://github.com/Flutterando/localization
 
 environment:
   sdk: ">=2.13.0 <3.0.0"
