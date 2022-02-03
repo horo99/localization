@@ -52,7 +52,7 @@ void main() {
 
   group('json file', () {
     test('load en_US', () async {
-      await LocalizationService.instance.changeLanguage(Locale('en', 'US'), 'test/assets/lang');
+      await LocalizationService.instance.changeLanguage(Locale('en', 'US'), ['test/assets/lang']);
       var value = LocalizationService.instance.read('login-label', []);
       expect(value, 'User');
       value = LocalizationService.instance.read('home-title', ['Flutterando']);
