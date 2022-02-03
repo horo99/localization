@@ -1,4 +1,7 @@
-## [2.0.0] 2022-01-24
+## [2.1.0] 2022-02-03
+* Added multiples path files.
+
+## [2.0.0+1] 2022-01-24
 Now the **Localization** package is fully integrated into Flutter and can reflect changes made natively by the SDK.
 
 * BREAK CHANGE: Removed packages translation files;

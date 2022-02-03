@@ -1,6 +1,6 @@
 name: localization
 description: Package to simplify the package translation.
-version: 2.0.0
+version: 2.1.0
 homepage: https://github.com/Flutterando/localization
 
 environment:
