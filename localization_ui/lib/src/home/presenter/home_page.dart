@@ -173,6 +173,21 @@ class _HomePageState extends State<HomePage> {
             columns: state.languages.length,
             rows: keys.length,
             columnHeaderBuilder: (int columnIndex) {
+              var difference = _getDifferences(columnIndex, keys);
+
+              if (difference.length > 0) {
+                return Container(
+                  alignment: Alignment.center,
+                  child: Text(
+                    '${state.languages[columnIndex].nameWithoutExtension} (${(difference.length > 1) ? 'missing-keys'.i18n([
+                            difference.length.toString(),
+                          ]) : 'missing-key'.i18n()})',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                );
+              }
               return Container(
                 alignment: Alignment.center,
                 child: Text(
@@ -209,9 +224,13 @@ class _HomePageState extends State<HomePage> {
             dataCellBuilder: (int rowIndex, int columnIndex) {
               final key = keys.elementAt(rowIndex);
               final lang = state.languages[columnIndex];
+              var difference = _getDifferences(columnIndex, keys);
 
-              return Padding(
+
+              return Container(
                 padding: const EdgeInsets.all(8.0),
+                color:
+                    difference.any((e) => e == key) ? Theme.of(context).colorScheme.error : null,
                 child: TextFormField(
                   key: ValueKey('$key$columnIndex'),
                   decoration: InputDecoration.collapsed(hintText: ''),
@@ -264,6 +283,18 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+
+  List<String> _getDifferences(int columnIndex, Set<String> keys) {
+    final store = context.watch<FileStore>();
+    final state = store.value;
+    if (state.languages.length < 1) return [];
+
+    final lang = state.languages[columnIndex];
+
+    var difference = keys.difference(lang.keys.toSet()).toList();
+
+    return difference;
+  }  
 
   Future<void> _dialogAddKeyName() async {
     showDialog(

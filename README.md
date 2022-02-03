@@ -24,8 +24,8 @@ Now, add the delegate in **MaterialApp** or **CupertinoApp** and define a path w
  @override
   Widget build(BuildContext context) {
     // set json file directory
-    // default value is 'lib/i18n'
-    LocalJsonLocalization.delegate.directory = 'lib/i18n';
+    // default value is ['lib/i18n']
+    LocalJsonLocalization.delegate.directories = ['lib/i18n'];
 
     return MaterialApp(
       localizationsDelegates: [
@@ -44,7 +44,7 @@ Now, add the delegate in **MaterialApp** or **CupertinoApp** and define a path w
 ## Json files
 
 The json file pattern must have the name of the locale and its content must be a json of key and value ONLY.
-Create the files in the directory configured (`LocalJsonLocalization.delegate.directory`):
+Create the files in the directory configured (`LocalJsonLocalization.delegate.directories`):
 
 ```
 lib/i18n/en_US.json

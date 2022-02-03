@@ -15,9 +15,19 @@ class LocalizationService {
 
   final _sentences = <String, String>{};
 
-  Future changeLanguage(Locale locale, String directory) async {
+  Future changeLanguage(Locale locale, List<String> directories) async {
+    clearSentences();
+    for (var directory in directories) {
+      await _changeLanguage(locale, directory);
+    }
+  }
+
+  Future _changeLanguage(Locale locale, String directory) async {
     late String data;
     final selectedLanguage = locale.toString();
+    if (directory.endsWith('/')) {
+      directory = directory.substring(0, directory.length - 1);
+    }
     final jsonFile = '$directory/$selectedLanguage.json';
 
     data = await rootBundle.loadString(jsonFile);
@@ -31,8 +41,6 @@ class LocalizationService {
       ColoredPrint.error(e.toString());
       _result = {};
     }
-
-    clearSentences();
 
     for (var entry in _result.entries) {
       if (_sentences.containsKey(entry.key)) {

@@ -21,7 +21,7 @@ class MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    LocalJsonLocalization.delegate.directory = 'assets/lang';
+    LocalJsonLocalization.delegate.directories = ['assets/lang'];
 
     return MaterialApp(
       title: 'Flutter Demo',

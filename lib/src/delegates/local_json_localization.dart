@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:localization/src/localization_service.dart';
 
 class LocalJsonLocalization extends LocalizationsDelegate {
-  String directory = 'lib/i18n';
+  List<String> directories = ['lib/i18n'];
   bool showDebugPrintMode = true;
   LocalJsonLocalization._();
 
@@ -14,7 +14,7 @@ class LocalJsonLocalization extends LocalizationsDelegate {
   @override
   Future<dynamic> load(Locale locale) async {
     LocalizationService.instance.showDebugPrintMode = showDebugPrintMode;
-    await LocalizationService.instance.changeLanguage(locale, directory);
+    await LocalizationService.instance.changeLanguage(locale, directories);
   }
 
   @override
