@@ -48,6 +48,29 @@ void main() {
       var value = LocalizationService.instance.read('full-name-complete-positional', ['Araujo', 'Moura']);
       expect(value, 'Jacob Araujo Moura %s9');
     });
+
+    test('Read with false condition arguments', () {
+      var count = 1;
+      LocalizationService.instance.addSentence('person-label', '%s %b{people:person}');
+
+      var value = LocalizationService.instance.read(
+        'person-label',
+        [count.toString()],
+        conditions: [count > 1],
+      );
+      expect(value, '1 person');
+    });
+    test('Read with true condition arguments', () {
+      final count = 2;
+      LocalizationService.instance.addSentence('person-label', '%s %b{people:person}');
+
+      var value = LocalizationService.instance.read(
+        'person-label',
+        [count.toString()],
+        conditions: [count > 1],
+      );
+      expect(value, '2 people');
+    });
   });
 
   group('json file', () {
