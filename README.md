@@ -107,7 +107,7 @@ final count = 2;
 String text = 'person-text',
         [], //args is a required positional parameter, if you don't gave a %s notation pass empty list []
         conditions: [count > 1],;
-print(text); // Welcome, people
+print(text); // Welcome, person
 ```
 **
 **THAT`S IT!
