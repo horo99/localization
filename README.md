@@ -104,9 +104,9 @@ You could plularization your Strings. Use **%b{true:false}** notion, where left 
 ```
 ```dart
 final count = 2;
-String text = 'person-text',
+String text = 'person-text'.i18n(
         [], //args is a required positional parameter, if you don't gave a %s notation pass empty list []
-        conditions: [count > 1],;
+        conditions: [count > 1]);
 print(text); // Welcome, person
 ```
 **
