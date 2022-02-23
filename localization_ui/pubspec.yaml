@@ -28,18 +28,23 @@ dependencies:
   localization:
     path: ../
   cupertino_icons: ^1.0.2
+  flutter_acrylic: ^1.0.0
   flutter_triple: ^1.2.6
   fpdart: ^0.0.12
-  provider: ^6.0.2
   file_picker: ^4.3.1
   path: ^1.8.0
   lazy_data_table_plus: ^1.0.0
+  bitsdojo_window: ^0.1.1+1
+  fluent_ui: ^3.9.0
+  system_theme: ^1.0.1
+  flutter_modular: ^4.5.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   mocktail: ^0.2.0
   value_listenable_test: ^0.0.1
+  flutter_lints: ^1.0.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

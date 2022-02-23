@@ -12,6 +12,7 @@ class FileStore extends ValueNotifier<FileState> {
   Future<void> setDirectoryAndLoad(String directory) async {
     value = value.setDirectoryAndLoad(directory);
     final result = await readJson.call(directory);
+    await Future.delayed(const Duration(milliseconds: 500));
     value = result.fold(value.setError, value.loadedLanguages);
   }
 

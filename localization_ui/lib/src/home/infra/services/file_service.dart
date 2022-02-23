@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:fpdart/fpdart.dart';
-import 'package:localization/src/localization_extension.dart';
+import 'package:localization/localization.dart';
 import 'package:localization_ui/src/home/domain/entities/language_file.dart';
 import 'package:localization_ui/src/home/domain/errors/errors.dart';
 import 'package:localization_ui/src/home/domain/services/file_service.dart';
@@ -41,7 +41,7 @@ class FileServiceImpl implements FileService {
       await _saveFile(language);
     }
 
-    return Right(unit);
+    return const Right(unit);
   }
 
   Future<void> _saveFile(LanguageFile language) async {
