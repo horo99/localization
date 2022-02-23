@@ -77,6 +77,4 @@ build/
 
 localization_ui/
 coverage/
-test/
 .dart_tool/
-test/

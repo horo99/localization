@@ -1,43 +1,36 @@
-import 'package:flutter/material.dart';
+import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 import 'package:localization/localization.dart';
-import 'package:provider/provider.dart';
-
-import 'home/domain/services/file_service.dart';
-import 'home/domain/usecases/read_json.dart';
-import 'home/domain/usecases/save_json.dart';
-import 'home/infra/services/file_service.dart';
-import 'home/presenter/home_page.dart';
-import 'home/presenter/stores/file_store.dart';
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        Provider<FileService>(create: (context) => FileServiceImpl()),
-        Provider<ReadJson>(create: (context) => ReadJsonImpl(context.read())),
-        Provider<SaveJson>(create: (context) => SaveJsonImpl(context.read())),
-        ChangeNotifierProvider(create: (context) => FileStore(context.read(), context.read())),
-      ],
-      child: MaterialApp(
-        title: 'Flutter Demo',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
-        localizationsDelegates: [
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-          LocalJsonLocalization.delegate,
-        ],
-        supportedLocales: [
-          Locale('en', ''),
-          Locale('es', ''),
-          Locale('pt', ''),
-        ],
-        home: HomePage(),
+    return FluentApp.router(
+      title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        accentColor: Colors.blue,
+        brightness: Brightness.dark,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
+      localeResolutionCallback: (locale, supported) {
+        return const Locale('en', 'US');
+      },
+      localizationsDelegates: [
+        GlobalWidgetsLocalizations.delegate,
+        LocalJsonLocalization.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en', 'US'),
+        Locale('es', 'ES'),
+        Locale('pt', 'BR'),
+      ],
+      routerDelegate: Modular.routerDelegate,
+      routeInformationParser: Modular.routeInformationParser,
+      color: Colors.blue,
     );
   }
 }

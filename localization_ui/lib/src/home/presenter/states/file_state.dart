@@ -10,23 +10,23 @@ abstract class FileState {
 
   FileState setDirectoryAndLoad(String directory) => LoadingFileState(
         directory: directory,
-        languages: this.languages,
-        keys: this.keys,
+        languages: languages,
+        keys: keys,
       );
   FileState loadedLanguages([List<LanguageFile>? languages]) => LoadedFileState.languages(
-        directory: this.directory,
+        directory: directory,
         languages: languages ?? this.languages,
       );
   FileState setLoading() => LoadingFileState(
-        directory: this.directory,
-        languages: this.languages,
-        keys: this.keys,
+        directory: directory,
+        languages: languages,
+        keys: keys,
       );
   FileState setError(FileServiceError error) => ErrorFileState(
         error: error,
-        directory: this.directory,
-        languages: this.languages,
-        keys: this.keys,
+        directory: directory,
+        languages: languages,
+        keys: keys,
       );
 }
 

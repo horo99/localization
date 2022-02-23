@@ -1,5 +1,20 @@
+## [2.1.0] 2022-02-03
+* Added multiples path files.
+
+## [2.0.0+1] 2022-01-24
+Now the **Localization** package is fully integrated into Flutter and can reflect changes made natively by the SDK.
+
+* BREAK CHANGE: Removed packages translation files;
+* BREAK CHANGE: `.i18n()` parameters are a positional args now;
+* BREAK CHANGE: Removed conditions. After long discussions, we decided that this is a developer responsibility, for example:
+```dart
+final items = 10;
+if(items == 1) return 'title-label-singular'.i18n();
+if(items > 1) return 'title-label-plural'.i18n();
+```
+
 ## [1.1.2-dev.1] 2022-01-13
-Adicionado suporte a arquivos de tradução com apenas a língua, como por exemplo `pt.json`;
+Added support of translation files just with language, for example `pt.json`;
 
 ```dart
 await Localization.configuration(showDebugPrintMode: false);
@@ -12,14 +27,14 @@ deixar Log ocional, para desativa-lo basta utilizar
 await Localization.configuration(showDebugPrintMode: false);
 ```
 
-Você também pode setar a variavel chamando a função
+You can set the variable calling the function:
 ```dart
 Localization.setShowDebugPrintMode(false);
 ```
 
-## [1.1.0] 2021-8-29
+## [1.1.0] 2021-08-29
 
-* BREAK CHANGE: Os parâmetros do método `'welcome'.i18n(["22/06"])` e `Localization.translate('welcome', ["22/06"])` estão nomeados
+* BREAK CHANGE: The parameters from method `'welcome'.i18n(["22/06"])` e `Localization.translate('welcome', ["22/06"])` are named;
 * BREAK CHANGE: Use `"welcome".i18n(args: ["22/06"])` ao invés de `"welcome".i18n(["22/06"])`
 * BREAK CHANGE: Use `Localization.translate('welcome', args: ["22/06"])` ao invés de `Localization.translate('welcome', ["22/06"])`
 ### New features
