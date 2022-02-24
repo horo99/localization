@@ -11,6 +11,8 @@ import 'package:localization_ui/src/home/presenter/stores/file_store.dart';
 import 'package:path/path.dart' hide context;
 import 'package:system_theme/system_theme.dart';
 
+import 'components/key_cell_widget.dart';
+
 class SaveIntent extends Intent {}
 
 class HomePage extends StatefulWidget {
@@ -24,6 +26,7 @@ class _HomePageState extends State<HomePage> {
   var _isPicked = false;
   var _hasEdited = false;
   var _isIdeasBox = false;
+  var _enableAnimationPane = false;
 
   final searchTextController = TextEditingController(text: '');
   String get _searchText => searchTextController.text;
@@ -181,8 +184,13 @@ class _HomePageState extends State<HomePage> {
         physics: const NeverScrollableScrollPhysics(),
         children: [
           AnimatedContainer(
-            duration: const Duration(milliseconds: 500),
+            duration: Duration(milliseconds: _enableAnimationPane ? 500 : 0),
             curve: Curves.easeOut,
+            onEnd: () {
+              setState(() {
+                _enableAnimationPane = false;
+              });
+            },
             width: !_isIdeasBox ? MediaQuery.of(context).size.width : openedPaneSize,
             child: FocusableActionDetector(
               autofocus: true,
@@ -215,7 +223,7 @@ class _HomePageState extends State<HomePage> {
                               children: [
                                 const Icon(FluentIcons.save),
                                 const SizedBox(width: 9),
-                                Text('save'.i18n()),
+                                Text('save'.i18n() + (_hasEdited ? '*' : '')),
                               ],
                             ),
                           ),
@@ -242,7 +250,7 @@ class _HomePageState extends State<HomePage> {
                               children: [
                                 const Icon(FluentIcons.edit),
                                 const SizedBox(width: 9),
-                                Text(state.directory != null ? '${basename(state.directory!)}${_hasEdited ? '*' : ''}' : 'select-a-directory'.i18n()),
+                                Text('select-a-directory'.i18n()),
                               ],
                             ),
                           ),
@@ -294,12 +302,20 @@ class _HomePageState extends State<HomePage> {
                         MouseRegion(
                           cursor: SystemMouseCursors.click,
                           child: Button(
+                            style: _isIdeasBox
+                                ? ButtonStyle(
+                                    backgroundColor: ButtonState.all<Color>(
+                                      Colors.black.withOpacity(0.2),
+                                    ),
+                                  )
+                                : const ButtonStyle(),
                             child: const Padding(
                               padding: EdgeInsets.all(4.0),
                               child: Icon(FluentIcons.lightbulb),
                             ),
                             onPressed: () {
                               setState(() {
+                                _enableAnimationPane = true;
                                 _isIdeasBox = !_isIdeasBox;
                               });
                             },
@@ -359,28 +375,18 @@ class _HomePageState extends State<HomePage> {
                         },
                         rowHeaderBuilder: (int rowIndex) {
                           final key = keys.elementAt(rowIndex);
-                          return MouseRegion(
-                            cursor: SystemMouseCursors.click,
-                            child: GestureDetector(
-                              onLongPress: () {
-                                Clipboard.setData(ClipboardData(text: key));
-                                showSnackbar(context, Snackbar(content: Text('clipboard-text'.i18n())));
-                              },
-                              onTap: () {
-                                _dialogUpdateKeyName(key);
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Center(
-                                  child: Text(
-                                    key,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
+                          return KeyCellWidget(
+                            keyName: key,
+                            // onTap: () {
+                            //   _dialogUpdateKeyName(key);
+                            // },
+                            onLongPress: () {
+                              Clipboard.setData(ClipboardData(text: key));
+                              showSnackbar(context, Snackbar(content: Text('clipboard-text'.i18n())));
+                            },
+                            onEditKey: () {
+                              _dialogUpdateKeyName(key);
+                            },
                           );
                         },
                         dataCellBuilder: (int rowIndex, int columnIndex) {

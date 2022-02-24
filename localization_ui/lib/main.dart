@@ -17,7 +17,7 @@ void main() async {
     module: AppModule(),
   ));
 
-  const initialSize = Size(1122.0, 725.0);
+  const initialSize = Size(1127.0, 600.0);
 
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
     await DesktopWindow.setMinWindowSize(initialSize);
