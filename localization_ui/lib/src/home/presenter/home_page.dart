@@ -181,13 +181,13 @@ class _HomePageState extends State<HomePage> {
           SaveIntent: CallbackAction(onInvoke: (e) {
             _hasEdited = false;
             store.saveLanguages();
+            return true;
           }),
         },
         child: Column(
           children: [
-            const SizedBox(height: 12),
             Container(
-              padding: const EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
+              padding: const EdgeInsets.only(left: 30, right: 30, top: 20, bottom: 20),
               color: Colors.black.withOpacity(0.38),
               child: Row(
                 mainAxisSize: MainAxisSize.max,
@@ -281,7 +281,7 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 10),
             Expanded(
               child: SizedBox(
                 width: MediaQuery.of(context).size.width,
@@ -359,7 +359,6 @@ class _HomePageState extends State<HomePage> {
                   dataCellBuilder: (int rowIndex, int columnIndex) {
                     final key = keys.elementAt(rowIndex);
                     final lang = state.languages[columnIndex];
-                    var difference = _getDifferences(columnIndex, keys);
 
                     return Container(
                       alignment: Alignment.center,
@@ -414,7 +413,7 @@ class _HomePageState extends State<HomePage> {
   List<String> _getDifferences(int columnIndex, Set<String> keys) {
     final store = context.watch<FileStore>();
     final state = store.value;
-    if (state.languages.length < 1) return [];
+    if (state.languages.isEmpty) return [];
 
     final lang = state.languages[columnIndex];
 
@@ -535,7 +534,7 @@ class _CustomFloatButtonState extends State<CustomFloatButton> with SingleTicker
   @override
   void initState() {
     super.initState();
-    controller = AnimationController(vsync: this, duration: Duration(milliseconds: 800));
+    controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 800));
     controller.addListener(() {
       setState(() {});
     });

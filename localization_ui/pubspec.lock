@@ -287,6 +287,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.6.3"
+  lazy_data_table:
+    dependency: "direct main"
+    description:
+      name: lazy_data_table
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.3.1"
   lazy_data_table_plus:
     dependency: "direct main"
     description:

@@ -10,6 +10,7 @@ import 'package:localization_ui/src/home/infra/services/file_service.dart';
 class FileFake extends Fake implements File {
   String text = '';
 
+  @override
   Future<File> writeAsString(String contents, {FileMode mode = FileMode.write, Encoding encoding = utf8, bool flush = false}) async {
     text = contents;
     return this;

@@ -25,7 +25,7 @@ void main() {
   valueListenableTest<FileStore>(
     'readJson',
     build: () {
-      when(() => readJson.call(any())).thenAnswer((_) async => Right([]));
+      when(() => readJson.call(any())).thenAnswer((_) async => const Right([]));
       return store;
     },
     act: (store) => store.setDirectoryAndLoad(''),
@@ -38,7 +38,7 @@ void main() {
   valueListenableTest<FileStore>(
     'saveJson',
     build: () {
-      when(() => saveJson.call([])).thenAnswer((_) async => Right(unit));
+      when(() => saveJson.call([])).thenAnswer((_) async => const Right(unit));
       return store;
     },
     act: (store) => store.saveLanguages(),
