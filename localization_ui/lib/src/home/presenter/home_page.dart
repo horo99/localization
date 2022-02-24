@@ -11,6 +11,8 @@ import 'package:localization_ui/src/home/presenter/states/file_state.dart';
 import 'package:localization_ui/src/home/presenter/stores/file_store.dart';
 import 'package:system_theme/system_theme.dart';
 
+import 'components/file_progress_widget.dart';
+import 'components/initial_widget.dart';
 import 'components/key_cell_widget.dart';
 import 'components/select_folder_button.dart';
 
@@ -28,7 +30,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  var _isPicked = false;
   var _isIdeasBox = false;
   var _enableAnimationPane = false;
 
@@ -72,50 +73,10 @@ class _HomePageState extends State<HomePage> {
     Widget child = Container();
 
     if (store.isLoading) {
-      child = const Center(
-        child: ProgressRing(),
-      );
+      child = const FileProgressWidget();
     } else if (state is InitFileState) {
-      child = Center(
-        child: Padding(
-          padding: const EdgeInsets.all(18.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'select-a-folder-initial-text'.i18n(),
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 24,
-                ),
-              ),
-              const SizedBox(height: 18),
-              const SelectFolderButton(textSize: 18),
-            ],
-          ),
-        ),
-      );
-    } else if (state is LoadedFileState && state.languages.isEmpty) {
-      child = Center(
-        child: Padding(
-          padding: const EdgeInsets.all(18.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'Nenhum arquivo de tradução encontrado'.i18n(),
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 24,
-                ),
-              ),
-              const SizedBox(height: 18),
-              const SelectFolderButton(textSize: 18),
-            ],
-          ),
-        ),
-      );
-    } else if (state is LoadedFileState && state.languages.isNotEmpty) {
+      child = const InitialWidget();
+    } else if (state is LoadedFileState) {
       final keys = state.keys.where((key) {
         if (_searchText.isEmpty || key.contains(_searchText)) {
           return true;
@@ -137,7 +98,7 @@ class _HomePageState extends State<HomePage> {
         physics: const NeverScrollableScrollPhysics(),
         children: [
           AnimatedContainer(
-            duration: Duration(milliseconds: _enableAnimationPane ? 500 : 0),
+            duration: Duration(milliseconds: _enableAnimationPane ? 300 : 0),
             curve: Curves.easeOut,
             onEnd: () {
               setState(() {
