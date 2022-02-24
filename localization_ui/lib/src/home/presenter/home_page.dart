@@ -6,14 +6,19 @@ import 'package:flutter/services.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:lazy_data_table_plus/lazy_data_table_plus.dart';
 import 'package:localization/localization.dart';
+import 'package:localization_ui/src/home/presenter/extensions/file_language_extension.dart';
 import 'package:localization_ui/src/home/presenter/states/file_state.dart';
 import 'package:localization_ui/src/home/presenter/stores/file_store.dart';
-import 'package:path/path.dart' hide context;
 import 'package:system_theme/system_theme.dart';
 
 import 'components/key_cell_widget.dart';
+import 'components/select_folder_button.dart';
 
 class SaveIntent extends Intent {}
+
+class UndoIntent extends Intent {}
+
+class RedoIntent extends Intent {}
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -24,7 +29,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   var _isPicked = false;
-  var _hasEdited = false;
   var _isIdeasBox = false;
   var _enableAnimationPane = false;
 
@@ -35,16 +39,13 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     final store = context.read<FileStore>();
-    store.addListener(() {
-      final state = store.value;
-      if (state is ErrorFileState) {
-        showSnackbar(
-          context,
-          Snackbar(
-            content: Text(state.error.message),
-          ),
-        );
-      }
+    store.observer(onError: (error) {
+      showSnackbar(
+        context,
+        Snackbar(
+          content: Text(error.message),
+        ),
+      );
     });
   }
 
@@ -52,15 +53,29 @@ class _HomePageState extends State<HomePage> {
     Platform.isMacOS ? LogicalKeyboardKey.meta : LogicalKeyboardKey.control,
     LogicalKeyboardKey.keyS,
   );
+  final undoFileKeySet = LogicalKeySet(
+    Platform.isMacOS ? LogicalKeyboardKey.meta : LogicalKeyboardKey.control,
+    LogicalKeyboardKey.keyZ,
+  );
+
+  final redoFileKeySet = LogicalKeySet(
+    Platform.isMacOS ? LogicalKeyboardKey.meta : LogicalKeyboardKey.control,
+    LogicalKeyboardKey.shift,
+    LogicalKeyboardKey.keyZ,
+  );
 
   @override
   Widget build(BuildContext context) {
-    final store = context.watch<FileStore>();
-    final state = store.value;
+    final store = context.watch<FileStore>((s) => s.selectState);
+    final state = store.state;
 
     Widget child = Container();
 
-    if (state is InitFileState) {
+    if (store.isLoading) {
+      child = const Center(
+        child: ProgressRing(),
+      );
+    } else if (state is InitFileState) {
       child = Center(
         child: Padding(
           padding: const EdgeInsets.all(18.0),
@@ -75,38 +90,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               const SizedBox(height: 18),
-              MouseRegion(
-                cursor: SystemMouseCursors.click,
-                child: Button(
-                  onPressed: _isPicked
-                      ? null
-                      : () async {
-                          setState(() {
-                            _isPicked = true;
-                          });
-                          final selectedDirectory = await FilePicker.platform.getDirectoryPath(lockParentWindow: false);
-                          _isPicked = false;
-                          if (selectedDirectory != null) {
-                            store.setDirectoryAndLoad(selectedDirectory);
-                          } else {
-                            setState(() {});
-                          }
-                        },
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(FluentIcons.edit),
-                      const SizedBox(width: 9),
-                      Text(
-                        'select-a-directory'.i18n(),
-                        style: const TextStyle(
-                          fontSize: 18,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              const SelectFolderButton(textSize: 18),
             ],
           ),
         ),
@@ -126,38 +110,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               const SizedBox(height: 18),
-              MouseRegion(
-                cursor: SystemMouseCursors.click,
-                child: Button(
-                  onPressed: _isPicked
-                      ? null
-                      : () async {
-                          setState(() {
-                            _isPicked = true;
-                          });
-                          final selectedDirectory = await FilePicker.platform.getDirectoryPath(lockParentWindow: false);
-                          _isPicked = false;
-                          if (selectedDirectory != null) {
-                            store.setDirectoryAndLoad(selectedDirectory);
-                          } else {
-                            setState(() {});
-                          }
-                        },
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(FluentIcons.edit),
-                      const SizedBox(width: 9),
-                      Text(
-                        'select-a-directory'.i18n(),
-                        style: const TextStyle(
-                          fontSize: 18,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              const SelectFolderButton(textSize: 18),
             ],
           ),
         ),
@@ -196,11 +149,20 @@ class _HomePageState extends State<HomePage> {
               autofocus: true,
               shortcuts: {
                 saveFileKeySet: SaveIntent(),
+                undoFileKeySet: UndoIntent(),
+                redoFileKeySet: RedoIntent(),
               },
               actions: {
                 SaveIntent: CallbackAction(onInvoke: (e) {
-                  _hasEdited = false;
                   store.saveLanguages();
+                  return true;
+                }),
+                UndoIntent: CallbackAction(onInvoke: (e) {
+                  store.undo();
+                  return true;
+                }),
+                RedoIntent: CallbackAction(onInvoke: (e) {
+                  store.redo();
                   return true;
                 }),
               },
@@ -216,45 +178,19 @@ class _HomePageState extends State<HomePage> {
                           cursor: SystemMouseCursors.click,
                           child: Button(
                             onPressed: () {
-                              _hasEdited = false;
                               store.saveLanguages();
                             },
                             child: Row(
                               children: [
                                 const Icon(FluentIcons.save),
                                 const SizedBox(width: 9),
-                                Text('save'.i18n() + (_hasEdited ? '*' : '')),
+                                Text('save'.i18n() + (!store.isSaved ? '*' : '')),
                               ],
                             ),
                           ),
                         ),
                         const SizedBox(width: 20),
-                        MouseRegion(
-                          cursor: SystemMouseCursors.click,
-                          child: Button(
-                            onPressed: _isPicked
-                                ? null
-                                : () async {
-                                    setState(() {
-                                      _isPicked = true;
-                                    });
-                                    final selectedDirectory = await FilePicker.platform.getDirectoryPath(lockParentWindow: false);
-                                    _isPicked = false;
-                                    if (selectedDirectory != null) {
-                                      store.setDirectoryAndLoad(selectedDirectory);
-                                    } else {
-                                      setState(() {});
-                                    }
-                                  },
-                            child: Row(
-                              children: [
-                                const Icon(FluentIcons.edit),
-                                const SizedBox(width: 9),
-                                Text('select-a-directory'.i18n()),
-                              ],
-                            ),
-                          ),
-                        ),
+                        const SelectFolderButton(),
                         const SizedBox(width: 20),
                         MouseRegion(
                           cursor: SystemMouseCursors.click,
@@ -267,6 +203,22 @@ class _HomePageState extends State<HomePage> {
                                 Text('new-key'.i18n()),
                               ],
                             ),
+                          ),
+                        ),
+                        const SizedBox(width: 20),
+                        MouseRegion(
+                          cursor: SystemMouseCursors.click,
+                          child: Button(
+                            onPressed: !store.canUndo() ? null : store.undo,
+                            child: const Icon(FluentIcons.undo),
+                          ),
+                        ),
+                        const SizedBox(width: 5),
+                        MouseRegion(
+                          cursor: SystemMouseCursors.click,
+                          child: Button(
+                            onPressed: !store.canRedo() ? null : store.redo,
+                            child: const Icon(FluentIcons.redo),
                           ),
                         ),
                         const SizedBox(width: 20),
@@ -329,6 +281,7 @@ class _HomePageState extends State<HomePage> {
                     child: SizedBox(
                       width: MediaQuery.of(context).size.width,
                       child: LazyDataTable(
+                        key: ValueKey(store.undoAndRedoCount),
                         tableDimensions: const LazyDataTableDimensions(
                           cellHeight: 89,
                           cellWidth: 300,
@@ -377,9 +330,6 @@ class _HomePageState extends State<HomePage> {
                           final key = keys.elementAt(rowIndex);
                           return KeyCellWidget(
                             keyName: key,
-                            // onTap: () {
-                            //   _dialogUpdateKeyName(key);
-                            // },
                             onLongPress: () {
                               Clipboard.setData(ClipboardData(text: key));
                               showSnackbar(context, Snackbar(content: Text('clipboard-text'.i18n())));
@@ -387,6 +337,7 @@ class _HomePageState extends State<HomePage> {
                             onEditKey: () {
                               _dialogUpdateKeyName(key);
                             },
+                            onDeleteKey: () => store.removeKey(key),
                           );
                         },
                         dataCellBuilder: (int rowIndex, int columnIndex) {
@@ -395,20 +346,17 @@ class _HomePageState extends State<HomePage> {
 
                           return Container(
                             alignment: Alignment.center,
-                            //  margin: const EdgeInsets.only(bottom: 13),
                             padding: const EdgeInsets.symmetric(horizontal: 8),
-                            //   color: difference.any((e) => e == key) ? Theme.of(context).colorScheme.error : null,
                             child: Transform.translate(
                               offset: const Offset(0, 8),
                               child: TextFormBox(
                                 maxLines: 3,
                                 key: ValueKey('$key$columnIndex'),
-                                // decoration: InputDecoration.collapsed(hintText: ''),
                                 onChanged: (value) {
-                                  lang.set(key, value);
-                                  setState(() {
-                                    _hasEdited = true;
-                                  });
+                                  final langsCopy = state.languages.map((e) => e.copy()).toList();
+                                  final langLocal = langsCopy[columnIndex];
+                                  langLocal.set(key, value);
+                                  store.updateLanguages(langsCopy);
                                 },
                                 initialValue: lang.read(key),
                               ),
@@ -435,10 +383,6 @@ class _HomePageState extends State<HomePage> {
           const IdeaPaneWidget(),
         ],
       );
-    } else {
-      child = const Center(
-        child: ProgressRing(),
-      );
     }
 
     return AnimatedSwitcher(
@@ -449,7 +393,7 @@ class _HomePageState extends State<HomePage> {
 
   List<String> _getDifferences(int columnIndex, Set<String> keys) {
     final store = context.watch<FileStore>();
-    final state = store.value;
+    final state = store.state;
     if (state.languages.isEmpty) return [];
 
     final lang = state.languages[columnIndex];
@@ -473,7 +417,6 @@ class _HomePageState extends State<HomePage> {
                 return;
               }
               context.read<FileStore>().addNewKey(key);
-              _hasEdited = true;
               Navigator.of(context).pop();
             },
             inputFormatters: [RemoveSpace()],
@@ -493,7 +436,6 @@ class _HomePageState extends State<HomePage> {
                   return;
                 }
                 context.read<FileStore>().addNewKey(key);
-                _hasEdited = true;
                 Navigator.of(context).pop();
               },
               style: ButtonStyle(
@@ -518,7 +460,6 @@ class _HomePageState extends State<HomePage> {
             textInputAction: TextInputAction.send,
             onFieldSubmitted: (text) {
               if (oldKey != key) {
-                _hasEdited = true;
                 context.read<FileStore>().editKey(oldKey, key);
               }
               Navigator.of(context).pop();
@@ -538,7 +479,6 @@ class _HomePageState extends State<HomePage> {
             Button(
               onPressed: () {
                 if (oldKey != key) {
-                  _hasEdited = true;
                   context.read<FileStore>().editKey(oldKey, key);
                 }
                 Navigator.of(context).pop();

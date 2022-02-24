@@ -29,7 +29,7 @@ dependencies:
     path: ../
   cupertino_icons: ^1.0.2
   flutter_acrylic: ^1.0.0
-  flutter_triple: ^1.2.6
+  flutter_triple: ^1.2.7+2
   fpdart: ^0.0.12
   file_picker: ^4.3.1
   path: ^1.8.0

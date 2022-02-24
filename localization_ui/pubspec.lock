@@ -232,7 +232,7 @@ packages:
       name: flutter_triple
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.2.6"
+    version: "1.2.7+2"
   flutter_web_plugins:
     dependency: transitive
     description: flutter
@@ -571,7 +571,7 @@ packages:
       name: triple
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.4.0"
+    version: "1.5.0+1"
   typed_data:
     dependency: transitive
     description:

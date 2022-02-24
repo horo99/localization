@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:desktop_window/desktop_window.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_acrylic/flutter_acrylic.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
@@ -18,6 +19,10 @@ void main() async {
   ));
 
   const initialSize = Size(1127.0, 600.0);
+
+  SystemChrome.setApplicationSwitcherDescription(const ApplicationSwitcherDescription(
+    label: 'Localization UI',
+  ));
 
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
     await DesktopWindow.setMinWindowSize(initialSize);

@@ -1,5 +1,4 @@
 import 'package:localization_ui/src/home/domain/entities/language_file.dart';
-import 'package:localization_ui/src/home/domain/errors/errors.dart';
 
 abstract class FileState {
   final String? directory;
@@ -8,48 +7,17 @@ abstract class FileState {
 
   FileState({this.directory, this.languages = const [], this.keys = const {}});
 
-  FileState setDirectoryAndLoad(String directory) => LoadingFileState(
-        directory: directory,
-        languages: languages,
-        keys: keys,
-      );
   FileState loadedLanguages([List<LanguageFile>? languages]) => LoadedFileState.languages(
         directory: directory,
         languages: languages ?? this.languages,
       );
-  FileState setLoading() => LoadingFileState(
-        directory: directory,
+  FileState changeDirectory([String? directory]) => LoadedFileState.languages(
+        directory: directory ?? this.directory,
         languages: languages,
-        keys: keys,
-      );
-  FileState setError(FileServiceError error) => ErrorFileState(
-        error: error,
-        directory: directory,
-        languages: languages,
-        keys: keys,
       );
 }
 
 class InitFileState extends FileState {}
-
-class ErrorFileState extends FileState {
-  final FileServiceError error;
-
-  ErrorFileState({
-    required this.error,
-    String? directory,
-    required List<LanguageFile> languages,
-    required Set<String> keys,
-  }) : super(directory: directory, languages: languages, keys: keys);
-}
-
-class LoadingFileState extends FileState {
-  LoadingFileState({
-    String? directory,
-    required List<LanguageFile> languages,
-    required Set<String> keys,
-  }) : super(directory: directory, languages: languages, keys: keys);
-}
 
 class LoadedFileState extends FileState {
   LoadedFileState._({
