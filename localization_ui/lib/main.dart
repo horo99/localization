@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:desktop_window/desktop_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_acrylic/flutter_acrylic.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -16,8 +17,15 @@ void main() async {
     module: AppModule(),
   ));
 
+  const initialSize = Size(1122.0, 725.0);
+
+  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    await DesktopWindow.setMinWindowSize(initialSize);
+  }
+
   if (Platform.isWindows) {
     await Window.setEffect(
+      dark: true,
       effect: WindowEffect.mica,
       color: const Color(0xCC222222),
     );

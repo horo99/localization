@@ -39,6 +39,7 @@ dependencies:
   fluent_ui: ^3.9.0
   system_theme: ^1.0.1
   flutter_modular: ^4.5.0
+  desktop_window: ^0.4.0
 
 dev_dependencies:
   flutter_test:
