@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -10,16 +9,12 @@ import 'package:localization/localization.dart';
 import 'package:localization_ui/src/home/presenter/extensions/file_language_extension.dart';
 import 'package:localization_ui/src/home/presenter/states/file_state.dart';
 import 'package:localization_ui/src/home/presenter/stores/file_store.dart';
-import 'package:system_theme/system_theme.dart';
-
 import 'components/custom_app_bar.dart';
 import 'components/file_progress_widget.dart';
 import 'components/ideas_pane_widget.dart';
 import 'components/initial_widget.dart';
 import 'components/key_cell_widget.dart';
-import 'components/select_folder_button.dart';
 import 'dialogs/dialogs.dart';
-import 'formatters/remove_space.dart';
 
 class SaveIntent extends Intent {}
 
