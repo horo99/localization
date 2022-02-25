@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
@@ -11,10 +12,14 @@ import 'package:localization_ui/src/home/presenter/states/file_state.dart';
 import 'package:localization_ui/src/home/presenter/stores/file_store.dart';
 import 'package:system_theme/system_theme.dart';
 
+import 'components/custom_app_bar.dart';
 import 'components/file_progress_widget.dart';
+import 'components/ideas_pane_widget.dart';
 import 'components/initial_widget.dart';
 import 'components/key_cell_widget.dart';
 import 'components/select_folder_button.dart';
+import 'dialogs/dialogs.dart';
+import 'formatters/remove_space.dart';
 
 class SaveIntent extends Intent {}
 
@@ -129,113 +134,27 @@ class _HomePageState extends State<HomePage> {
               },
               child: Column(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.only(left: 30, right: 30, top: 20, bottom: 20),
-                    color: Colors.black.withOpacity(0.38),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        MouseRegion(
-                          cursor: SystemMouseCursors.click,
-                          child: Button(
-                            onPressed: () {
-                              store.saveLanguages();
-                            },
-                            child: Row(
-                              children: [
-                                const Icon(FluentIcons.save),
-                                const SizedBox(width: 9),
-                                Text('save'.i18n() + (!store.isSaved ? '*' : '')),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 20),
-                        const SelectFolderButton(),
-                        const SizedBox(width: 20),
-                        MouseRegion(
-                          cursor: SystemMouseCursors.click,
-                          child: Button(
-                            onPressed: _dialogAddKeyName,
-                            child: Row(
-                              children: [
-                                const Icon(FluentIcons.translate),
-                                const SizedBox(width: 9),
-                                Text('new-key'.i18n()),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 20),
-                        MouseRegion(
-                          cursor: SystemMouseCursors.click,
-                          child: Button(
-                            onPressed: !store.canUndo() ? null : store.undo,
-                            child: const Icon(FluentIcons.undo),
-                          ),
-                        ),
-                        const SizedBox(width: 5),
-                        MouseRegion(
-                          cursor: SystemMouseCursors.click,
-                          child: Button(
-                            onPressed: !store.canRedo() ? null : store.redo,
-                            child: const Icon(FluentIcons.redo),
-                          ),
-                        ),
-                        const SizedBox(width: 20),
-                        const Spacer(),
-                        ConstrainedBox(
-                          constraints: const BoxConstraints(
-                            maxWidth: 400,
-                          ),
-                          child: TextBox(
-                            controller: searchTextController,
-                            placeholder: 'search'.i18n() + '...',
-                            suffix: _searchText.isEmpty
-                                ? null
-                                : MouseRegion(
-                                    cursor: SystemMouseCursors.click,
-                                    child: IconButton(
-                                      icon: const Icon(FluentIcons.clear),
-                                      onPressed: () {
-                                        setState(() {
-                                          searchTextController.text = '';
-                                        });
-                                      },
-                                    ),
-                                  ),
-                            onChanged: (value) {
-                              setState(() {});
-                            },
-                            cursorColor: Colors.white,
-                            style: const TextStyle(color: Colors.white),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        MouseRegion(
-                          cursor: SystemMouseCursors.click,
-                          child: Button(
-                            style: _isIdeasBox
-                                ? ButtonStyle(
-                                    backgroundColor: ButtonState.all<Color>(
-                                      Colors.black.withOpacity(0.2),
-                                    ),
-                                  )
-                                : const ButtonStyle(),
-                            child: const Padding(
-                              padding: EdgeInsets.all(4.0),
-                              child: Icon(FluentIcons.lightbulb),
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _enableAnimationPane = true;
-                                _isIdeasBox = !_isIdeasBox;
-                              });
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
+                  CustomAppBar(
+                    onNewKeyPressed: () {
+                      Future.microtask(() {
+                        dialogAddKeyName(context);
+                      });
+                    },
+                    onChanged: (value) {
+                      setState(() {});
+                    },
+                    searchTextController: searchTextController,
+                    onCancelSearch: () {
+                      setState(() {
+                        searchTextController.text = '';
+                      });
+                    },
+                    onIdeasButtonPressed: () {
+                      setState(() {
+                        _enableAnimationPane = true;
+                        _isIdeasBox = !_isIdeasBox;
+                      });
+                    },
                   ),
                   const SizedBox(height: 10),
                   Expanded(
@@ -256,7 +175,6 @@ class _HomePageState extends State<HomePage> {
                           cornerBorder: Border.all(color: Colors.black.withOpacity(0.38)),
                           columnHeaderColor: Colors.black.withOpacity(0.3),
                           rowHeaderColor: Colors.black.withOpacity(0.3),
-                          //  cellColor: Colors.white,
                           cornerColor: Colors.black.withOpacity(0.3),
                         ),
                         columns: state.languages.length,
@@ -296,7 +214,7 @@ class _HomePageState extends State<HomePage> {
                               showSnackbar(context, Snackbar(content: Text('clipboard-text'.i18n())));
                             },
                             onEditKey: () {
-                              _dialogUpdateKeyName(key);
+                              dialogUpdateKeyName(key, context);
                             },
                             onDeleteKey: () => store.removeKey(key),
                           );
@@ -341,7 +259,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
-          const IdeaPaneWidget(),
+          const IdeasPaneWidget(),
         ],
       );
     }
@@ -362,206 +280,5 @@ class _HomePageState extends State<HomePage> {
     var difference = keys.difference(lang.keys.toSet()).toList();
 
     return difference;
-  }
-
-  Future<void> _dialogAddKeyName() async {
-    showDialog(
-      context: context,
-      builder: (context) {
-        var key = '';
-        return ContentDialog(
-          title: Text('key-name'.i18n()),
-          content: TextBox(
-            textInputAction: TextInputAction.send,
-            onSubmitted: (_) {
-              if (key.isEmpty) {
-                return;
-              }
-              context.read<FileStore>().addNewKey(key);
-              Navigator.of(context).pop();
-            },
-            inputFormatters: [RemoveSpace()],
-            onChanged: (value) => key = value,
-            placeholder: 'key'.i18n(),
-          ),
-          actions: [
-            Button(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('cancel'.i18n()),
-            ),
-            Button(
-              onPressed: () {
-                if (key.isEmpty) {
-                  return;
-                }
-                context.read<FileStore>().addNewKey(key);
-                Navigator.of(context).pop();
-              },
-              style: ButtonStyle(
-                backgroundColor: ButtonState.all(SystemTheme.accentInstance.accent),
-              ),
-              child: Text('save'.i18n()),
-            )
-          ],
-        );
-      },
-    );
-  }
-
-  Future<void> _dialogUpdateKeyName(String oldKey) async {
-    showDialog(
-      context: context,
-      builder: (context) {
-        var key = '';
-        return ContentDialog(
-          title: Text('edit-key'.i18n()),
-          content: TextFormBox(
-            textInputAction: TextInputAction.send,
-            onFieldSubmitted: (text) {
-              if (oldKey != key) {
-                context.read<FileStore>().editKey(oldKey, key);
-              }
-              Navigator.of(context).pop();
-            },
-            inputFormatters: [RemoveSpace()],
-            initialValue: oldKey,
-            onChanged: (value) => key = value,
-            placeholder: 'key'.i18n(),
-          ),
-          actions: [
-            Button(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('cancel'.i18n()),
-            ),
-            Button(
-              onPressed: () {
-                if (oldKey != key) {
-                  context.read<FileStore>().editKey(oldKey, key);
-                }
-                Navigator.of(context).pop();
-              },
-              style: ButtonStyle(
-                backgroundColor: ButtonState.all(SystemTheme.accentInstance.accent),
-              ),
-              child: Text('save'.i18n()),
-            )
-          ],
-        );
-      },
-    );
-  }
-}
-
-class IdeaPaneWidget extends StatelessWidget {
-  const IdeaPaneWidget({
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 300,
-      height: double.infinity,
-      color: Colors.black.withOpacity(0.58),
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: ListView(
-          children: [
-            const SizedBox(height: 30),
-            Text(
-              'tips'.i18n(),
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 24,
-              ),
-            ),
-            const SizedBox(height: 20),
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.grey,
-                borderRadius: BorderRadius.circular(5),
-              ),
-              padding: const EdgeInsets.all(15),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    margin: const EdgeInsets.only(top: 3.7, right: 10),
-                    height: 10,
-                    width: 10,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  Expanded(child: Text('tip-long-click'.i18n())),
-                ],
-              ),
-            )
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class CustomFloatButton extends StatefulWidget {
-  final bool animate;
-  final Widget? child;
-  final void Function()? onPressed;
-  const CustomFloatButton({Key? key, this.animate = false, this.onPressed, this.child}) : super(key: key);
-
-  @override
-  _CustomFloatButtonState createState() => _CustomFloatButtonState();
-}
-
-class _CustomFloatButtonState extends State<CustomFloatButton> with SingleTickerProviderStateMixin {
-  late final AnimationController controller;
-
-  @override
-  void initState() {
-    super.initState();
-    controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 800));
-    controller.addListener(() {
-      setState(() {});
-    });
-  }
-
-  @override
-  void didUpdateWidget(covariant CustomFloatButton oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.animate) {
-      controller.repeat(reverse: true);
-    } else {
-      controller.reset();
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container();
-    // return FloatingActionButton(
-    //   backgroundColor: Color.lerp(Colors.blue, Colors.red, controller.value),
-    //   child: widget.child,
-    //   onPressed: widget.onPressed,
-    // );
-  }
-}
-
-class RemoveSpace extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
-    final text = newValue.text.replaceAll(' ', '');
-    return newValue.copyWith(
-      text: text,
-      selection: TextSelection.fromPosition(
-        TextPosition(offset: text.length),
-      ),
-    );
   }
 }

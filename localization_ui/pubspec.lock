@@ -572,6 +572,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.5.0+1"
+  triple_test:
+    dependency: "direct dev"
+    description:
+      name: triple_test
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.0"
   typed_data:
     dependency: transitive
     description:
