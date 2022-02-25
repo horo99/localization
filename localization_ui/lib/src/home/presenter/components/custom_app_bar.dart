@@ -7,6 +7,7 @@ import 'select_folder_button.dart';
 
 class CustomAppBar extends StatelessWidget {
   final void Function()? onNewKeyPressed;
+  final void Function()? onNewLanguagePressed;
   final void Function()? onIdeasButtonPressed;
   final void Function()? onCancelSearch;
   final void Function(String value)? onChanged;
@@ -18,6 +19,7 @@ class CustomAppBar extends StatelessWidget {
     this.onChanged,
     this.onCancelSearch,
     this.onIdeasButtonPressed,
+    this.onNewLanguagePressed,
   }) : super(key: key);
 
   String get _searchText => searchTextController.text;
@@ -63,7 +65,9 @@ class CustomAppBar extends StatelessWidget {
                 ),
                 DropDownButtonItem(
                   title: Text('new-language'.i18n()),
-                  onTap: () => debugPrint('new-language'),
+                  onTap: () {
+                    onNewLanguagePressed?.call();
+                  },
                 ),
               ],
             ),

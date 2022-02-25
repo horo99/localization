@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:desktop_window/desktop_window.dart';
 import 'package:flutter/material.dart';
-import 'package:window_size/window_size.dart' as window_size;
 import 'package:flutter_acrylic/flutter_acrylic.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
@@ -21,7 +20,6 @@ void main() async {
   const initialSize = Size(1127.0, 600.0);
 
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-    window_size.setWindowTitle('Localization UI');
     await DesktopWindow.setMinWindowSize(initialSize);
   }
 

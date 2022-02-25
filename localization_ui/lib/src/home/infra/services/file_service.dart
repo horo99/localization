@@ -6,6 +6,7 @@ import 'package:localization/localization.dart';
 import 'package:localization_ui/src/home/domain/entities/language_file.dart';
 import 'package:localization_ui/src/home/domain/errors/errors.dart';
 import 'package:localization_ui/src/home/domain/services/file_service.dart';
+import 'package:localization_ui/src/home/domain/usecases/delete_json.dart';
 import 'package:localization_ui/src/home/domain/usecases/save_json.dart';
 import '../../domain/usecases/read_json.dart';
 
@@ -47,27 +48,10 @@ class FileServiceImpl implements FileService {
   Future<void> _saveFile(LanguageFile language) async {
     await language.file.writeAsString(jsonEncode(language.getMap()));
   }
-  // Future<void> _saveFile(LanguageFile language) async {
-  //   final buff = StringBuffer();
-  //   final keys = language.keys;
-  //   if (keys.isEmpty) {
-  //     buff.write('{');
-  //   } else {
-  //     buff.writeln('{');
-  //   }
 
-  //   for (var i = 0; i < keys.length; i++) {
-  //     final key = keys[i];
-  //     final value = language.read(key);
-  //     buff.write('  \"$key\": \"$value\"');
-  //     if (i != (keys.length - 1)) {
-  //       buff.write(',');
-  //     }
-  //     buff.write('\n');
-  //   }
-
-  //   buff.write('}');
-
-  //   await language.file.writeAsString(buff.toString());
-  // }
+  @override
+  DeleteJsonCallback deleteLanguage(LanguageFile language) async {
+    await language.file.delete();
+    return const Right(unit);
+  }
 }

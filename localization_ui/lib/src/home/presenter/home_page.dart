@@ -9,7 +9,10 @@ import 'package:localization/localization.dart';
 import 'package:localization_ui/src/home/presenter/extensions/file_language_extension.dart';
 import 'package:localization_ui/src/home/presenter/states/file_state.dart';
 import 'package:localization_ui/src/home/presenter/stores/file_store.dart';
+import 'components/column_widget.dart';
+import 'components/create_new_key_widget.dart';
 import 'components/custom_app_bar.dart';
+import 'components/empty_language_widget.dart';
 import 'components/file_progress_widget.dart';
 import 'components/ideas_pane_widget.dart';
 import 'components/initial_widget.dart';
@@ -77,19 +80,25 @@ class _HomePageState extends State<HomePage> {
     } else if (state is InitFileState) {
       child = const InitialWidget();
     } else if (state is LoadedFileState) {
-      final keys = state.keys.where((key) {
-        if (_searchText.isEmpty || key.contains(_searchText)) {
-          return true;
-        }
+      final keys = state.keys
+          .where(
+            (key) {
+              if (_searchText.isEmpty || key.contains(_searchText)) {
+                return true;
+              }
 
-        for (var lang in state.languages) {
-          final text = lang.read(key).toLowerCase();
-          if (text.contains(_searchText.toLowerCase())) {
-            return true;
-          }
-        }
-        return false;
-      }).toSet();
+              for (var lang in state.languages) {
+                final text = lang.read(key).toLowerCase();
+                if (text.contains(_searchText.toLowerCase())) {
+                  return true;
+                }
+              }
+              return false;
+            },
+          )
+          .toList()
+          .reversed
+          .toSet();
 
       final openedPaneSize = MediaQuery.of(context).size.width - 300;
 
@@ -150,106 +159,104 @@ class _HomePageState extends State<HomePage> {
                         _isIdeasBox = !_isIdeasBox;
                       });
                     },
+                    onNewLanguagePressed: () {
+                      Future.microtask(() {
+                        dialogAddNewLanguage(context);
+                      });
+                    },
                   ),
                   const SizedBox(height: 10),
-                  Expanded(
-                    child: SizedBox(
-                      width: MediaQuery.of(context).size.width,
-                      child: LazyDataTable(
-                        key: ValueKey(store.undoAndRedoCount),
-                        tableDimensions: const LazyDataTableDimensions(
-                          cellHeight: 89,
-                          cellWidth: 300,
-                          columnHeaderHeight: 50,
-                          rowHeaderWidth: 220,
-                        ),
-                        tableTheme: LazyDataTableTheme(
-                          columnHeaderBorder: Border.all(color: Colors.black.withOpacity(0.38)),
-                          rowHeaderBorder: Border.all(color: Colors.black.withOpacity(0.38)),
-                          cellBorder: Border.all(color: Colors.black.withOpacity(0.12)),
-                          cornerBorder: Border.all(color: Colors.black.withOpacity(0.38)),
-                          columnHeaderColor: Colors.black.withOpacity(0.3),
-                          rowHeaderColor: Colors.black.withOpacity(0.3),
-                          cornerColor: Colors.black.withOpacity(0.3),
-                        ),
-                        columns: state.languages.length,
-                        rows: keys.length,
-                        columnHeaderBuilder: (int columnIndex) {
-                          var difference = _getDifferences(columnIndex, keys);
+                  if (state.languages.isEmpty)
+                    Expanded(
+                      child: SizedBox(
+                        width: MediaQuery.of(context).size.width,
+                        child: const EmptyLanguageWidget(),
+                      ),
+                    ),
+                  if (state.languages.isNotEmpty)
+                    Expanded(
+                      child: SizedBox(
+                        width: MediaQuery.of(context).size.width,
+                        child: LazyDataTable(
+                          key: ValueKey(store.undoAndRedoCount),
+                          tableDimensions: const LazyDataTableDimensions(
+                            cellHeight: 89,
+                            cellWidth: 300,
+                            columnHeaderHeight: 50,
+                            rowHeaderWidth: 220,
+                          ),
+                          tableTheme: LazyDataTableTheme(
+                            columnHeaderBorder: Border.all(color: Colors.black.withOpacity(0.38)),
+                            rowHeaderBorder: Border.all(color: Colors.black.withOpacity(0.38)),
+                            cellBorder: Border.all(color: Colors.black.withOpacity(0.12)),
+                            cornerBorder: Border.all(color: Colors.black.withOpacity(0.38)),
+                            columnHeaderColor: Colors.black.withOpacity(0.3),
+                            rowHeaderColor: Colors.black.withOpacity(0.3),
+                            cornerColor: Colors.black.withOpacity(0.3),
+                          ),
+                          columns: state.languages.length,
+                          rows: keys.length,
+                          columnHeaderBuilder: (int columnIndex) {
+                            final lang = state.languages[columnIndex];
+                            return ColumnWidget(
+                              languageName: lang.nameWithoutExtension,
+                              onRemoveLanguage: () {
+                                didRemoveLanguageDialog(lang, context);
+                              },
+                            );
+                          },
+                          rowHeaderBuilder: (int rowIndex) {
+                            final key = keys.elementAt(rowIndex);
+                            return KeyCellWidget(
+                              keyName: key,
+                              onLongPress: () {
+                                Clipboard.setData(ClipboardData(text: key));
+                                showSnackbar(context, Snackbar(content: Text('clipboard-text'.i18n())));
+                              },
+                              onEditKey: () {
+                                dialogUpdateKeyName(key, context);
+                              },
+                              onDeleteKey: () => store.removeKey(key),
+                            );
+                          },
+                          dataCellBuilder: (int rowIndex, int columnIndex) {
+                            final key = keys.elementAt(rowIndex);
+                            final lang = state.languages[columnIndex];
 
-                          if (difference.isNotEmpty) {
                             return Container(
                               alignment: Alignment.center,
-                              child: Text(
-                                '${state.languages[columnIndex].nameWithoutExtension} (${(difference.length > 1) ? 'missing-keys'.i18n([
-                                        difference.length.toString(),
-                                      ]) : 'missing-key'.i18n()})',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
+                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                              child: Transform.translate(
+                                offset: const Offset(0, 8),
+                                child: TextFormBox(
+                                  maxLines: 3,
+                                  key: ValueKey('$key$columnIndex'),
+                                  onChanged: (value) {
+                                    final langsCopy = state.languages.map((e) => e.copy()).toList();
+                                    final langLocal = langsCopy[columnIndex];
+                                    langLocal.set(key, value);
+                                    store.updateLanguages(langsCopy);
+                                  },
+                                  initialValue: lang.read(key),
                                 ),
                               ),
                             );
-                          }
-                          return Container(
-                            alignment: Alignment.center,
+                          },
+                          cornerWidget: Center(
                             child: Text(
-                              state.languages[columnIndex].nameWithoutExtension,
+                              'keys'.i18n(),
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                          );
-                        },
-                        rowHeaderBuilder: (int rowIndex) {
-                          final key = keys.elementAt(rowIndex);
-                          return KeyCellWidget(
-                            keyName: key,
-                            onLongPress: () {
-                              Clipboard.setData(ClipboardData(text: key));
-                              showSnackbar(context, Snackbar(content: Text('clipboard-text'.i18n())));
-                            },
-                            onEditKey: () {
-                              dialogUpdateKeyName(key, context);
-                            },
-                            onDeleteKey: () => store.removeKey(key),
-                          );
-                        },
-                        dataCellBuilder: (int rowIndex, int columnIndex) {
-                          final key = keys.elementAt(rowIndex);
-                          final lang = state.languages[columnIndex];
-
-                          return Container(
-                            alignment: Alignment.center,
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            child: Transform.translate(
-                              offset: const Offset(0, 8),
-                              child: TextFormBox(
-                                maxLines: 3,
-                                key: ValueKey('$key$columnIndex'),
-                                onChanged: (value) {
-                                  final langsCopy = state.languages.map((e) => e.copy()).toList();
-                                  final langLocal = langsCopy[columnIndex];
-                                  langLocal.set(key, value);
-                                  store.updateLanguages(langsCopy);
-                                },
-                                initialValue: lang.read(key),
-                              ),
-                            ),
-                          );
-                        },
-                        cornerWidget: state.languages.isEmpty
-                            ? null
-                            : Center(
-                                child: Text(
-                                  'keys'.i18n(),
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                  if (keys.isEmpty && state.languages.isNotEmpty)
+                    const Expanded(
+                      child: CreateNewKeyWidget(),
+                    )
                 ],
               ),
             ),
@@ -263,17 +270,5 @@ class _HomePageState extends State<HomePage> {
       duration: const Duration(seconds: 1),
       child: child,
     );
-  }
-
-  List<String> _getDifferences(int columnIndex, Set<String> keys) {
-    final store = context.watch<FileStore>();
-    final state = store.state;
-    if (state.languages.isEmpty) return [];
-
-    final lang = state.languages[columnIndex];
-
-    var difference = keys.difference(lang.keys.toSet()).toList();
-
-    return difference;
   }
 }
