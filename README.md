@@ -96,7 +96,21 @@ print(text); // Welcome, Peter
 ```
 The **%s** notation can also be retrieved positionally. Just use **%s0, %s1, %s2**...
 
-THAT`S IT!
+You could plularization your Strings. Use **%b{true:false}** notion, where left is a string value when condition is true and on the right is a value when condition is false:
+```json
+{
+  "person-text": "Welcome, %b{people:person}"
+}
+```
+```dart
+final count = 2;
+String text = 'person-text'.i18n(
+        [], //args is a required positional parameter, if you don't gave a %s notation give a empty list []
+        conditions: [count > 1]);
+print(text); // Welcome, people
+```
+**
+**THAT`S IT!
 
 ## Additional settings
 

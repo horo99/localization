@@ -55,16 +55,86 @@ class LocalizationService {
     _sentences[key] = value;
   }
 
-  String read(String key, List<String> arguments) {
+  String read(
+    String key,
+    List<String> arguments, {
+    List<bool>? conditions,
+  }) {
     if (!_sentences.containsKey(key)) {
       return key;
     }
     var value = _sentences[key]!;
     if (value.contains('%s')) {
-      return replaceArguments(value, arguments);
+      value = replaceArguments(value, arguments);
+    }
+    if (value.contains('%b')) {
+      value = replaceConditions(value, conditions);
     }
 
     return value;
+  }
+
+  String replaceConditions(String value, List<bool>? conditions) {
+    final matchers = _getConditionMatch(value);
+
+    if (conditions == null || conditions.length == 0) {
+      ColoredPrint.error('Existe condicionais configurada na String mas não foi passado nenhum por parametro.');
+      return value;
+    }
+    if (matchers.length != conditions.length) {
+      ColoredPrint.error('A Quantidade de condicionais configurada na chave não condiz com os parametros.');
+      return value;
+    }
+
+    for (var matcher in matchers) {
+      for (var i = 1; i <= matcher.groupCount; i++) {
+        value = _replaceConditions(matchers, conditions, value);
+        final finded = matcher.group(i);
+        if (finded == null) {
+          continue;
+        }
+      }
+    }
+
+    return value;
+  }
+
+  Iterable<RegExpMatch> _getConditionMatch(String text) {
+    String pattern = r"%b\{(\s*?.*?)*?\}";
+    RegExp regExp = new RegExp(
+      pattern,
+      caseSensitive: false,
+      multiLine: false,
+    );
+    if (regExp.hasMatch(text)) {
+      var matches = regExp.allMatches(text);
+      return matches;
+    }
+
+    return [];
+  }
+
+  String _replaceConditions(Iterable<RegExpMatch> matches, List<bool> plurals, String text) {
+    var newText = text;
+    int i = 0;
+
+    for (var item in matches) {
+      var replaced = item.group(0) ?? '';
+
+      RegExp regCondition = new RegExp(
+        r'(?<=\{)(.*?)(?=\})',
+        caseSensitive: false,
+        multiLine: false,
+      );
+      var e = regCondition.stringMatch(replaced)?.split(':');
+      var n = plurals[i] ? e![0] : e![1];
+
+      newText = newText.replaceAll(replaced, n);
+
+      i++;
+    }
+
+    return newText;
   }
 
   String replaceArguments(String value, List<String> arguments) {
