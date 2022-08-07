@@ -12,6 +12,7 @@ class CustomAppBar extends StatelessWidget {
   final void Function()? onCancelSearch;
   final void Function(String value)? onChanged;
   final TextEditingController searchTextController;
+
   const CustomAppBar({
     Key? key,
     this.onNewKeyPressed,
@@ -36,7 +37,9 @@ class CustomAppBar extends StatelessWidget {
         mainAxisSize: MainAxisSize.max,
         children: [
           MouseRegion(
-            cursor: store.isSaved ? SystemMouseCursors.basic : SystemMouseCursors.click,
+            cursor: store.isSaved
+                ? SystemMouseCursors.basic
+                : SystemMouseCursors.click,
             child: Button(
               onPressed: store.isSaved ? null : store.saveLanguages,
               child: Row(
@@ -51,26 +54,18 @@ class CustomAppBar extends StatelessWidget {
           separedWidget,
           const SelectFolderButton(),
           separedWidget,
-          MouseRegion(
-            cursor: SystemMouseCursors.click,
-            child: DropDownButton(
-              leading: const Icon(FluentIcons.translate),
-              title: const Text('New'),
-              items: [
-                DropDownButtonItem(
-                  title: Text('new-key'.i18n()),
-                  onTap: () {
-                    onNewKeyPressed?.call();
-                  },
-                ),
-                DropDownButtonItem(
-                  title: Text('new-language'.i18n()),
-                  onTap: () {
-                    onNewLanguagePressed?.call();
-                  },
-                ),
-              ],
-            ),
+          DropDownButton(
+              // closeAfterClick: false,
+            // leading: const Icon(FluentIcons.translate),
+            // title: const Text('New'),
+            items: [
+              MenuFlyoutItem(
+                  text: Text('new-key'.i18n()),
+                  onPressed: () => onNewKeyPressed?.call()),
+              MenuFlyoutItem(
+                  text: Text('new-language'.i18n()),
+                  onPressed: () => onNewLanguagePressed?.call()),
+            ],
           ),
           separedWidget,
           MouseRegion(
@@ -92,7 +87,7 @@ class CustomAppBar extends StatelessWidget {
           const Spacer(),
           ConstrainedBox(
             constraints: const BoxConstraints(
-              maxWidth: 400,
+              maxWidth: 200,
             ),
             child: TextBox(
               controller: searchTextController,

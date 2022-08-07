@@ -20,13 +20,12 @@ class MyApp extends StatelessWidget {
         return const Locale('en', 'US');
       },
       localizationsDelegates: [
-        GlobalWidgetsLocalizations.delegate,
+        DefaultFluentLocalizations.delegate,
         LocalJsonLocalization.delegate,
       ],
       supportedLocales: const [
+        // Locale('en'),
         Locale('en', 'US'),
-        Locale('es', 'ES'),
-        Locale('pt', 'BR'),
       ],
       routerDelegate: Modular.routerDelegate,
       routeInformationParser: Modular.routeInformationParser,
